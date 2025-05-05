@@ -1,0 +1,73 @@
+name: e2e tests execution # Назва workflow для виконання e2e тестів
+
+on:
+  workflow_dispatch: # Дозволяє запускати workflow вручну через GitHub Actions
+    inputs: # Налаштування вхідних параметрів для користувацького запуску
+      runtest: # Назва параметра
+        description: "what tests you want to run? Default: all-tests" # Опис для користувача
+        type: choice # Тип вхідного параметра - вибір
+        required: true # Обов’язковий параметр
+        default: "coffee-cart" # Значення за замовчуванням
+        options: # Можливі варіанти вибору
+          - rztk
+          - coffee-cart
+          - content-operation
+          - condulit
+
+permissions: # Встановлення дозволів для цього workflow
+  id-token: write # Дозволяє записувати ID-токен (для аутентифікації OIDC)
+  contents: read # Дозволяє читати вміст репозиторію
+  checks: write # Дозволяє записувати статуси перевірок
+
+jobs: # Оголошення завдань у цьому workflow
+  test: # Назва завдання (job)
+    runs-on: ubuntu-latest # Виконується на останній версії Ubuntu
+
+    container: # Використання контейнера для виконання тестів
+      image: mcr.microsoft.com/playwright:v1.46.0-jammy # Контейнер з встановленим Playwright
+
+    env: # Оголошення змінних середовища
+      RUNTEST: all-tests # Значення за замовчуванням
+
+    steps: # Послідовність кроків виконання
+      - uses: actions/checkout@v4 # Завантажує код репозиторію у середовище CI/CD
+
+      - uses: actions/setup-node@v4 # Встановлює Node.js
+        with:
+          node-version: 20 # Використовує Node.js версії 20
+
+      - name: Set Environment Variable # Встановлення змінної середовища
+        run: |
+          if [ -n "${{ inputs.runtest }}" ]; then
+          echo "Setting RUNTEST from github.event.inputs.RUNTEST"
+          echo "RUNTEST=${{ inputs.runtest }}" >> $GITHUB_ENV
+          fi
+        # Якщо користувач передав параметр `runtest`, він буде використаний у змінній `RUNTEST`
+
+      - name: Install dependencies # Встановлення залежностей
+        run: npm ci # Встановлює всі залежності з package-lock.json
+
+      - name: Run tests # Запуск тестів
+        run: npm run $RUNTEST # Виконує npm-скрипт, що відповідає значенню `RUNTEST`
+
+      - name: Fix permission for reports # Фікс прав доступу до звітів
+        if: always() # Виконується завжди, незалежно від успішності попередніх кроків
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          export GITHUB_WORKSPACE_HOST=/runner/_work/${GITHUB_WORKSPACE#"/__w/"}
+
+      - uses: actions/upload-artifact@v4 # Завантажує звіт про тести як артефакт
+        if: always() # Завжди виконується
+        with:
+          name: playwright-report # Ім'я артефакту
+          path: playwright-report/ # Шлях до папки з репортом
+          retention-days: 14 # Зберігає звіт про тести протягом 14 днів
+
+      - uses: dorny/test-reporter@v1 # Завантажує результати тестів у форматі JUnit
+        name: report
+        if: always() # Виконується завжди
+        continue-on-error: true # Продовжує виконання навіть у разі помилки
+        with:
+          name: report # Ім'я звіту
+          path: junit-report/junit-report.xml # Шлях до файлу звіту у форматі JUnit
+          reporter: java-junit # Використовує формат звіту Java JUnit
