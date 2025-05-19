@@ -1,6 +1,6 @@
 import { test as base } from "@playwright/test";
-import { PageManager } from "../ui/pages/PageManager";
-import { ControllersManage } from "app/api/ControllersManage";
+import { PageManager } from "@page/PageManager";
+import { ControllersManage } from "@controllers/ControllersManage";
 
 type MyPages = {
   pages: PageManager;

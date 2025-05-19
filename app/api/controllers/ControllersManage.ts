@@ -1,5 +1,5 @@
 import { APIRequestContext } from "@playwright/test";
-import { SearchController } from "./controllers/SearchController";
+import { SearchController } from "./SearchController";
 
 export class ControllersManage {
   searchController: SearchController;
