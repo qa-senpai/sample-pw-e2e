@@ -1,5 +1,4 @@
-import { expect } from "@playwright/test";
-import { test } from "@uiFixture/base.fixture";
+import { test, expect } from "@fixtures/base.fixture";
 
 test("has title", async ({ pages, apiClient }) => {
   const response = await apiClient.searchController.getSearchRequest({

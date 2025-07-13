@@ -17,3 +17,5 @@ export const test = base.extend<MyPages>({
     use(apiClient);
   },
 });
+
+export { expect } from "@playwright/test";

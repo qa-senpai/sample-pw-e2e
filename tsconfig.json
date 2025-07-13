@@ -12,9 +12,16 @@
     "allowSyntheticDefaultImports": true,
     "baseUrl": "./",
     "paths": {
-      "@uiFixture/*": ["app/fixtures/*"],
-      "@page/*": ["app/ui/pages/*"],
-      "@controllers/*": ["app/api/controllers/*"]
+      "@fixtures/*": ["./app/fixtures/*"],
+      "@page/*": ["./app/ui/pages/*"],
+      "@pages/*": ["./app/ui/pages/*"],
+      "@components/*": ["./app/ui/components/*"],
+      "@modals/*": ["./app/ui/modals/*"],
+      "@controllers/*": ["./app/api/controllers/*"],
+      "@api/*": ["./app/api/*"],
+      "@utils/*": ["./utils/*"],
+      "@tests/*": ["./tests/*"],
+      "@helpers/*": ["./tests/*"]
     }
   }
 }
